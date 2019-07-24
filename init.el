@@ -119,7 +119,10 @@
 ;;
 
 (use-package dired
-  :hook (dired-mode . dired-hide-details-mode))
+  :hook (dired-mode . dired-hide-details-mode)
+  :bind (("C-x D" . (lambda ()
+                      (interactive)
+                      (dired (file-name-directory buffer-file-name))))))
 
 (use-package ibuffer
   :custom (ibuffer-expert t)
