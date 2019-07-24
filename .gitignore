@@ -1,0 +1,8 @@
+# Everything
+/*
+
+# Except
+!init.el
+!site-lisp/
+!.gitmodules
+!.gitignore
