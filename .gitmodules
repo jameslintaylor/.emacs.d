@@ -1,0 +1,9 @@
+[submodule "site-lisp/alabaster-theme"]
+	path = site-lisp/alabaster-theme
+	url = git@github.com:jameslintaylor/alabaster-theme.git
+[submodule "site-lisp/better-defaults"]
+	path = site-lisp/better-defaults
+	url = git@github.com:technomancy/better-defaults.git
+[submodule "site-lisp/use-package"]
+	path = site-lisp/use-package
+	url = git@github.com:jwiegley/use-package.git
