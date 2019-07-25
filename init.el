@@ -92,15 +92,15 @@
   :hook (generic-lisp-mode . show-paren-mode))
 
 (use-package lispy
-  :hook (generic-lisp-mode . lispy-mode)
   :custom
   (lispy-compat '(edebug cider))
+  :hook (generic-lisp-mode . lispy-mode))
+
+(use-package lispyville
+  :hook (lispy-mode . lispyville-mode)
   :config
-  (use-package lispyville
-    :hook (lispy-mode . lispyville-mode)
-    :config
-    (lispyville-set-key-theme '(mark-toggle
-                                additional-movement))))
+  (lispyville-set-key-theme '(mark-toggle
+                              additional-movement)))
 
 (use-package rainbow-delimiters
   :hook (generic-lisp-mode . rainbow-delimiters-mode))
