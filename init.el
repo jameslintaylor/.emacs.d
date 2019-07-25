@@ -1,6 +1,4 @@
-;;
-;; # An emacs configuration by jameslintaylor
-;;
+;;; init.el --- An emacs configuration by jameslintaylor
 
 ;; 
 ;; ## Setup
