@@ -41,18 +41,13 @@
   (evil-move-cursor-back nil)
 
   :init
-  (evil-mode 1)
+  (evil-mode t))
 
-  :config
-  ;; minibuffer needs some special love
-  (add-hook 'minibuffer-setup-hook
-            '(lambda ()
-               (set (make-local-variable 'evil-echo-state) nil)
-               (evil-emacs-state 1))))
+;;
+;; ## Hydra
+;;
 
-(use-package evil-surround
-  :config
-  (global-evil-surround-mode t))
+(use-package hydra)
 
 ;;
 ;; ## Ivy
@@ -69,16 +64,11 @@
 (use-package swiper
   :custom
   (swiper-goto-start-of-match t)
-  :bind
-  (:map evil-motion-state-map
-        ("/" . swiper)
-        ("?" . swiper-backward)))
+  :bind (:map evil-motion-state-map
+              ("/" . swiper)
+              ("?" . swiper-backward)))
 
-;;
-;; ## Hydra
-;;
-
-(use-package hydra)
+(use-package ivy-hydra)
 
 ;;
 ;; ## Magit
@@ -114,82 +104,10 @@
     (lispyville-set-key-theme '(mark-toggle
                                 additional-movement))))
 
-;;
-;; ## Everything else
-;;
-
-(use-package dired
-  :hook (dired-mode . dired-hide-details-mode)
-  :bind (("C-x D" . (lambda ()
-                      (interactive)
-                      (dired (file-name-directory buffer-file-name))))))
-
-(use-package ibuffer
-  :custom (ibuffer-expert t)
-  :bind (("C-x C-b" . ibuffer)))
-
-(use-package hippie-exp
-  :custom
-  ;; try-expand-line and try-expand-list are often problematic in that
-  ;; they introduce unbalanced expressions.
-  (hippie-expand-try-functions-list
-   (seq-reduce (lambda (a x) (remove x a))
-               '(try-expand-line
-                 try-expand-list)
-               hippie-expand-try-functions-list))
-  :bind (("C-/" . hippie-expand)))
-
-(use-package yasnippet
-  :delight yas-minor-mode
-  :bind (("C-M-/" . yas-expand))
-  :custom
-  (yas-snippet-dirs `(,(concat user-emacs-directory "snippets")))
-  :config
-  (yas-global-mode 1))
-
-(use-package hl-line
-  :init
-  (global-hl-line-mode))
-
-(use-package recentf
-  :bind
-  (("C-x C-r" . my/recentf-find-file)
-   ("C-x 4 C-r" . my/recentf-find-file-other-window))
-  :custom
-  (recentf-max-saved-items 150)
-  :init
-  (recentf-mode 1)
-  (defun my/recentf-find-file ()
-    "Use `completing-read' to find a recent file."
-    (interactive)
-    (if (find-file (completing-read "Find recent file: " recentf-list))
-        (message "Opening file...")
-      (message "Aborting")))
-  (defun my/recentf-find-file-other-window ()
-    "Use `completing-read' to find a recent file."
-    (interactive)
-    (if (find-file-other-window (completing-read "Find recent file (other-window): " recentf-list))
-        (message "Opening file...")
-      (message "Aborting"))))
-
-(use-package undo-tree
-  :bind
-  (:map undo-tree-map
-        ("C-r" . nil)))
-
-(use-package docker
-  :bind
-  (("C-c d" . docker)))
-
-(use-package ace-window
-  :bind
-  (("C-x C-o" . ace-window)
-   ("C-x 4 C-t" . ace-swap-window)
-   ("C-x 4 0" . ace-delete-window)
-   ("C-x 4 1" . ace-delete-other-windows)))
-
 (use-package rainbow-delimiters
   :hook (generic-lisp-mode . rainbow-delimiters-mode))
+
+(use-package clojure-mode)
 
 (use-package cider
   :load-path "site-lisp/cider"
@@ -201,25 +119,9 @@
     "gd" 'cider-find-var
     "gh" 'magit-status))
 
-(use-package clojure-mode
-  :config
-  (define-clojure-indent
-    (defroutes 'defun)
-    (checked-context 'defun)
-    (if-any-fails 'defun)
-    (as-> 'macro)
-    (defconfig 'macro)
-    (GET 2)
-    (POST 2)
-    (PUT 2)
-    (DELETE 2)
-    (HEAD 2)
-    (ANY 2)
-    (OPTIONS 2)
-    (PATCH 2)
-    (rfn 2)
-    (let-routes 1)
-    (context 2)))
+;;
+;; ## Projectile
+;; 
 
 (use-package projectile
   :custom
@@ -256,6 +158,10 @@ semantics of `ag`"
 
   (fset 'projectile-ag 'my/projectile-ag))
 
+;;
+;; ## Silver searcher
+;;
+
 (use-package ag
   :custom
   (ag-group-matches nil))
@@ -264,10 +170,58 @@ semantics of `ag`"
   :hook
   (compilation-mode . winnow-mode))
 
+;;
+;; ## Eshell
+;;
+
+(use-package eshell
+  :init
+  (setq eshell-save-history-on-exit t
+        eshell-prefer-lisp-functions nil
+        eshell-destroy-buffer-when-process-dies t))
+
+(use-package rust-mode)
+
+;;
+;; ## Everything else
+;;
+
 (use-package exec-path-from-shell
   :config
   (when (memq window-system '(mac ns x))
     (exec-path-from-shell-initialize)))
+
+(use-package hl-line
+  :init
+  (global-hl-line-mode))
+
+(use-package ace-window
+  :bind
+  (("C-x C-o" . ace-window)
+   ("C-x 4 C-t" . ace-swap-window)
+   ("C-x 4 0" . ace-delete-window)
+   ("C-x 4 1" . ace-delete-other-windows)))
+
+(use-package recentf
+  :bind
+  (("C-x C-r" . my/recentf-find-file)
+   ("C-x 4 C-r" . my/recentf-find-file-other-window))
+  :custom
+  (recentf-max-saved-items 150)
+  :init
+  (recentf-mode 1)
+  (defun my/recentf-find-file ()
+    "Use `completing-read' to find a recent file."
+    (interactive)
+    (if (find-file (completing-read "Find recent file: " recentf-list))
+        (message "Opening file...")
+      (message "Aborting")))
+  (defun my/recentf-find-file-other-window ()
+    "Use `completing-read' to find a recent file."
+    (interactive)
+    (if (find-file-other-window (completing-read "Find recent file (other-window): " recentf-list))
+        (message "Opening file...")
+      (message "Aborting"))))
 
 (use-package winner
   :bind
@@ -276,36 +230,30 @@ semantics of `ag`"
   :init
   (winner-mode 1))
 
-(use-package eshell
-  :init
-  (setq eshell-save-history-on-exit t
-        eshell-prefer-lisp-functions nil
-        eshell-destroy-buffer-when-process-dies t))
+(use-package dired
+  :hook (dired-mode . dired-hide-details-mode)
+  :bind (("C-x D" . (lambda ()
+                      (interactive)
+                      (dired (file-name-directory buffer-file-name))))))
 
-(add-hook 'eshell-mode-hook
-          (lambda ()
+(use-package docker
+  :bind
+  (("C-c d" . docker)))
 
-            (add-to-list 'eshell-visual-commands "ssh")
-            (add-to-list 'eshell-visual-commands "tail")
-            (add-to-list 'eshell-visual-commands "top")))
+(use-package ibuffer
+  :custom (ibuffer-expert t)
+  :bind (("C-x C-b" . ibuffer)))
 
-(add-hook 'eshell-mode-hook
-          (lambda ()
-            (eshell/alias "e" "find-file $1")
-            (eshell/alias "ff" "find-file $1")
-            (eshell/alias "emacs" "find-file $1")
-            (eshell/alias "ee" "find-file-other-window $1")
-            (eshell/alias "d" "dired $1")
-
-            ;; The 'ls' executable requires the Gnu version on the Mac
-            (let ((ls (if (file-exists-p "/usr/local/bin/gls")
-                          "/usr/local/bin/gls"
-                        "/bin/ls")))
-              (eshell/alias "ll" (concat ls " -AlohG --color=always")))))
-
-(use-package rust-mode)
-
-;;; needs to find a home
+(use-package hippie-exp
+  :custom
+  ;; try-expand-line and try-expand-list are often problematic in that
+  ;; they introduce unbalanced expressions.
+  (hippie-expand-try-functions-list
+   (seq-reduce (lambda (a x) (remove x a))
+               '(try-expand-line
+                 try-expand-list)
+               hippie-expand-try-functions-list))
+  :bind (("C-/" . hippie-expand)))
 
 (defun my/toggle-buffer ()
   "Switch to previously open buffer.
@@ -321,39 +269,15 @@ Repeated invocations toggle between the two most recently open buffers."
     (other-window arg)
     (switch-to-buffer b2)))
 
-(defun eshell-here ()
-  "Opens up a new shell in the directory associated with the
-current buffer's file. The eshell is renamed to match that
-directory to make multiple eshell windows easier."
-  (interactive)
-  (let* ((parent (if (buffer-file-name)
-                     (file-name-directory (buffer-file-name))
-                   default-directory))
-         (height (/ (window-total-height) 3))
-         (name   (car (last (split-string parent "/" t)))))
-    (split-window-vertically (- height))
-    (other-window 1)
-    (eshell "new")
-    (rename-buffer (concat "*eshell: " name "*"))
+(use-package repeat
+  :bind (("C-x ." . repeat)))
 
-    (insert (concat "ls"))
-    (eshell-send-input)))
-
-(global-set-key (kbd "C-x $") 'eshell-here)
-
-(global-set-key (kbd "C-x .") 'repeat)
 (global-set-key (kbd "C-x B") 'my/toggle-buffer)
 (global-set-key (kbd "C-x O") (lambda () (interactive) (other-window -1)))
 (global-set-key (kbd "C-x 4 t") 'my/transpose-windows)
+
 (global-set-key (kbd "M-c") 'completion-at-point)
 (global-set-key (kbd "M-e") 'hippie-expand)
-
-;; Fira Code ligatures
-(set-face-attribute 'default nil
-                    :family "Fira Code"
-                    :height 130
-                    :weight 'normal
-                    :width 'normal)
 
 ;; Scratch buffer
 
@@ -362,6 +286,13 @@ directory to make multiple eshell windows easier."
 (setq mac-command-modifier (quote meta))")
 
 (setq initial-buffer-choice (lambda () (get-buffer "*scratch*")))
+
+;; Fira Code
+(set-face-attribute 'default nil
+                    :family "Fira Code"
+                    :height 130
+                    :weight 'normal
+                    :width 'normal)
 
 ;; Theme
 (load-theme 'alabaster t)
