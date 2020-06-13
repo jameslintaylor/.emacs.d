@@ -1,5 +1,6 @@
 ;;; init.el --- An emacs configuration by jameslintaylor
 
+
 ;; 
 ;; ## Setup
 ;; 
@@ -40,6 +41,10 @@
 
   :init
   (evil-mode t))
+
+(use-package evil-visualstar
+  :init
+  (global-evil-visualstar-mode t))
 
 ;;
 ;; ## Hydra
@@ -105,14 +110,25 @@
 (use-package rainbow-delimiters
   :hook (generic-lisp-mode . rainbow-delimiters-mode))
 
-(use-package clojure-mode)
+(use-package clojure-mode
+  :config
+  (define-clojure-indent
+    (context 2)
+    (POST 2)
+    (ex/if-any-fails 1)
+    (ex/tfn 1)
+    (match-some 1)
+    (pair-repr-json-ok 2)))
 
 (use-package cider
   :load-path "site-lisp/cider"
   :custom
   (cider-prompt-for-symbol nil)
   (cider-repl-display-in-current-window t)
+  (cider-inject-dependencies-at-jack-in t)
   :config
+  (define-clojure-indent
+    (are-responses 1))
   (evil-define-key '(normal visual) 'cider-mode-map
     "gd" 'cider-find-var
     "gh" 'magit-status))
@@ -230,9 +246,14 @@ semantics of `ag`"
 
 (use-package dired
   :hook (dired-mode . dired-hide-details-mode)
+  :custom
+  (evil-motion-state-modes (cons 'dired-mode evil-motion-state-modes))
   :bind (("C-x D" . (lambda ()
                       (interactive)
-                      (dired (file-name-directory buffer-file-name))))))
+                      (dired (file-name-directory buffer-file-name)))))
+  :config
+  (evil-define-key 'motion dired-mode-map (kbd "<return>") 'dired-find-file)
+  (evil-define-key 'motion dired-mode-map (kbd "^") 'dired-up-directory))
 
 (use-package docker
   :bind
@@ -284,6 +305,15 @@ Repeated invocations toggle between the two most recently open buffers."
 (setq mac-command-modifier (quote meta))")
 
 (setq initial-buffer-choice (lambda () (get-buffer "*scratch*")))
+
+(use-package ruler-mode
+  :hook (find-file . ruler-mode))
+
+(use-package simple
+  :custom
+  (column-number-mode t))
+
+(setq js-indent-level 2)
 
 ;; Fira Code
 (set-face-attribute 'default nil
