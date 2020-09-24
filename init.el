@@ -121,7 +121,6 @@
     (pair-repr-json-ok 2)))
 
 (use-package cider
-  :load-path "site-lisp/cider"
   :custom
   (cider-prompt-for-symbol nil)
   (cider-repl-display-in-current-window t)
