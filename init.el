@@ -1,9 +1,9 @@
 ;;; init.el --- An emacs configuration by jameslintaylor
 
 
-;; 
+;;
 ;; ## Setup
-;; 
+;;
 
 (setq emacs-start-time (current-time))
 
@@ -12,9 +12,7 @@
     (normal-top-level-add-subdirs-to-load-path))
   (add-to-list 'custom-theme-load-path "~/.emacs.d/site-lisp/alabaster-theme/")
   (require 'use-package)
-  (require 'better-defaults)
-  ;; the above sets ido-mode, I am trying out ivy.
-  (ido-mode nil))
+  (require 'better-defaults))
 
 (use-package package
   :custom
@@ -53,7 +51,7 @@
 (use-package hydra)
 
 ;;
-;; ## Ivy
+;; ## Ivy + Counsel + Swiper
 ;;
 
 (use-package ivy
@@ -62,7 +60,8 @@
 
 (use-package counsel
   :init
-  (counsel-mode t))
+  (counsel-mode t)
+  :bind (("C-x C-r" . counsel-recentf)))
 
 (use-package swiper
   :custom
@@ -113,6 +112,7 @@
 (use-package clojure-mode
   :config
   (define-clojure-indent
+    (try-req 0)
     (context 2)
     (POST 2)
     (ex/if-any-fails 1)
@@ -134,8 +134,14 @@
     "gh" 'magit-status))
 
 ;;
+;; ## Swift
+;;
+
+(use-package swift-mode)
+
+;;
 ;; ## Projectile
-;; 
+;;
 
 (use-package projectile
   :custom
@@ -217,25 +223,10 @@ semantics of `ag`"
    ("C-x 4 1" . ace-delete-other-windows)))
 
 (use-package recentf
-  :bind
-  (("C-x C-r" . my/recentf-find-file)
-   ("C-x 4 C-r" . my/recentf-find-file-other-window))
   :custom
   (recentf-max-saved-items 150)
   :init
-  (recentf-mode 1)
-  (defun my/recentf-find-file ()
-    "Use `completing-read' to find a recent file."
-    (interactive)
-    (if (find-file (completing-read "Find recent file: " recentf-list))
-        (message "Opening file...")
-      (message "Aborting")))
-  (defun my/recentf-find-file-other-window ()
-    "Use `completing-read' to find a recent file."
-    (interactive)
-    (if (find-file-other-window (completing-read "Find recent file (other-window): " recentf-list))
-        (message "Opening file...")
-      (message "Aborting"))))
+  (recentf-mode 1))
 
 (use-package winner
   :bind
@@ -312,6 +303,10 @@ Repeated invocations toggle between the two most recently open buffers."
 (use-package simple
   :custom
   (column-number-mode t))
+
+(use-package css-mode
+  :custom
+  (css-indent-offset 2))
 
 (setq js-indent-level 2)
 
